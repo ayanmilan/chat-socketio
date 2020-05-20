@@ -1,0 +1,16 @@
+{
+  "name": "messages",
+  "version": "1.0.0",
+  "description": "Chat app",
+  "main": "server.js",
+  "scripts": {
+    "start": "nodemon server.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "mongodb": "^3.5.7",
+    "nodemon": "^2.0.3",
+    "socket.io": "^2.3.0"
+  }
+}

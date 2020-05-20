@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+	<title>Messages</title>
+	<style>
+		#msgs{height:300px;}
+		#status{color:blue;}
+	</style>
+</head>
+<body>
+	<div class="container">
+		<div class="row">
+			<div class="col-md-6 offset-md-3 col-sm-12">
+				<h1 class="text-center">
+					MESSAGES
+					<br>
+					<button id="clear" class="btn btn-danger">CLEAR</button>
+				</h1>	
+					<br>
+					<div id="status"></div>
+					<div id="chat">
+						<input type="text" id="username" class="form-control" placeholder="Enter name">
+						<br>
+						<div class="card">
+							<div id="msgs" class="card-block">
+								
+							</div>
+						</div>
+						<br>
+						<textarea id="textarea" class="form-control" placeholder="Type your message..."></textarea>
+					</div>
+				</h1>
+			</div>
+		</div>	
+	</div>
+
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.dev.js"></script>
+	<script>
+		( () => {
+			var element = (id) => {
+				return document.getElementById(id);
+			}
+
+			var status = element('status');
+			var msgs = element('msgs');
+			var textarea = element('textarea');
+			var username = element('username');
+			var clearbtn = element('clear');
+
+			var statusDefault = status.textContent;
+
+			var setStatus = (s) => {
+				status.textContent = s;
+
+				if(s != statusDefault) {
+					var delay = setTimeout( () => {
+						setStatus(statusDefault);
+					},4000);
+				}
+			}
+
+			var socket = io.connect('http://192.168.1.5:4000');
+
+			// check for connection
+			if(socket != undefined) {
+				console.log('Client connected to socket.');
+
+				socket.on('output', (data) => {
+					//console.log(data);
+					for(var x = 0;x < data.length;x++){
+						var msg = document.createElement('div');
+						msg.setAttribute('class','chat-message');
+						msg.textContent = data[x].name+": "+data[x].msg;
+						msgs.appendChild(msg);
+						msgs.insertBefore(msg,msgs.firstChild);
+					}
+				});
+
+				socket.on('status', (data) => {
+					setStatus((typeof data == 'object')? data.msg : data);
+
+					if(data.clear) {
+						textarea.value = '';
+					}
+				});
+
+				textarea.addEventListener('keydown', (event) => {
+					if(event.which == 13) {
+						socket.emit('input', {
+							name:username.value,
+							msg:textarea.value
+						});
+
+						event.preventDefault();
+					}
+				});
+
+				clearbtn.addEventListener('click', () => {
+					socket.emit('clear');
+				});
+
+				socket.on('cleared', () => {
+					msgs.textContent = '';
+				});
+			}
+
+		})();
+	</script>
+</body>
+</html>
