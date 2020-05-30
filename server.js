@@ -4,7 +4,7 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
-const dburl = 'mongodb+srv://admin:admin@cluster0-pes0o.mongodb.net/test?retryWrites=true&w=majority"'
+const dburl = '<mongo-url>'
 
 // connect to mongo
 mongo.connect(dburl, (err, client) => {
